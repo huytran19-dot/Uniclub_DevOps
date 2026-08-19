@@ -330,3 +330,4 @@ This project is for educational purposes.
 ---
 
 For detailed setup instructions, see **[SETUP_GUIDE.md](SETUP_GUIDE.md)**
+# Uniclub_DevOps
