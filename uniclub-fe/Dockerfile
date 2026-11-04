@@ -1,44 +1,49 @@
-# Stage 1: Build Admin
-FROM node:20-alpine AS build-admin
+# ==========================================
+# Stage 1: Build Workspace (Admin & Web)
+# ==========================================
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy admin source
-COPY admin/ ./
+# Bật pnpm phiên bản xác định
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
-# Install dependencies and build
-RUN npm install && npm run build
+# BƯỚC TỐI ƯU CACHE: Chỉ copy các file quản lý thư viện vào trước
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY admin/package.json ./admin/
+COPY web/package.json ./web/
 
-# Stage 2: Build Web
-FROM node:20-alpine AS build-web
+# Cài đặt toàn bộ thư viện cho cả workspace (sẽ dùng lại cache nếu package.json không đổi)
+RUN pnpm install --frozen-lockfile
 
-WORKDIR /app
+# Copy toàn bộ mã nguồn vào sau khi đã cài thư viện xong
+COPY . .
 
-# Copy web source
-COPY web/ ./
+# Build Admin và Web
+RUN pnpm --filter admin run build
+RUN pnpm --filter web run build
 
-# Install dependencies and build
-RUN npm install && npm run build
-
-# Stage 3: Runtime with Nginx
+# ==========================================
+# Stage 2: Runtime with Nginx
+# ==========================================
 FROM nginx:alpine
 
-# Remove default nginx config
+# Xóa cấu hình mặc định
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy built files
-COPY --from=build-admin /app/dist /usr/share/nginx/html/admin
-COPY --from=build-web /app/dist /usr/share/nginx/html/web
+# Copy thư mục build từ stage builder
+COPY --from=builder /app/admin/dist /usr/share/nginx/html/admin
+COPY --from=builder /app/web/dist /usr/share/nginx/html/web
 
-# Copy nginx configuration
+# Copy cấu hình Nginx của bạn
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose ports
+# Mở port
 EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
-# Start nginx
+# Khởi động nginx
 CMD ["nginx", "-g", "daemon off;"]

@@ -18,16 +18,16 @@ public class ConfigVerification {
     @Value("${spring.datasource.url:jdbc:mysql://localhost:3307/uniclub}")
     private String dbUrl;
     
-    @Value("${sendgrid.api-key:your-sendgrid-api-key-here}")
+    @Value("${sendgrid.api-key:}")
     private String sendgridKey;
     
-    @Value("${cloudinary.cloud_name:deooamndi}")
+    @Value("${cloudinary.cloud_name:}")
     private String cloudinaryName;
     
-    @Value("${jwt.secret:uniclub-secret-key-for-jwt-token-generation-2024}")
+    @Value("${jwt.secret:uniclub-dev-jwt-secret-key-min-256-bits-length-for-security}")
     private String jwtSecret;
     
-    @Value("${vnpay.tmn-code:CGEJ0TI4}")
+    @Value("${vnpay.tmn-code:}")
     private String vnpayTmn;
     
     @PostConstruct

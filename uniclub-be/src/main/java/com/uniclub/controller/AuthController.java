@@ -37,15 +37,6 @@ public class AuthController {
     @Autowired
     private VerificationService verificationService;
 
-    // ✅ Temporary endpoint to generate BCrypt hash for testing
-    @PostMapping("/generate-hash")
-    public ResponseEntity<String> generateHash(@RequestParam String password) {
-        org.springframework.security.crypto.password.PasswordEncoder encoder = 
-            new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-        String hash = encoder.encode(password);
-        return ResponseEntity.ok(hash);
-    }
-
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
         try {

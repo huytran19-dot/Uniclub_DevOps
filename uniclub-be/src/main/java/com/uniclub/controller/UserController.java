@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +30,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // CREATE
+    // CREATE (Chỉ SysAdmin mới được tạo tài khoản trực tiếp qua endpoint này)
     @PostMapping
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
         try {
             UserResponse created = userService.createUser(request);
@@ -42,44 +44,45 @@ public class UserController {
         }
     }
 
-    // UPDATE
+    // UPDATE (Chống IDOR: Chỉ SysAdmin HOẶC chính chủ sở hữu tài khoản mới được cập nhật)
     @PutMapping("/{id}")
+    @PreAuthorize("@userSecurity.isCurrentUser(#id, principal)")
     public ResponseEntity<?> update(@PathVariable Integer id,
-                                            @Valid @RequestBody UpdateUserRequest request) {
+                                    @Valid @RequestBody UpdateUserRequest request) {
         try {
             UserResponse updated = userService.updateUser(id, request);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace(); // Log the error to console
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
 
-    // GET ALL
+    // GET ALL (Chỉ SysAdmin mới được lấy danh sách toàn bộ người dùng)
     @GetMapping
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<List<UserResponse>> getAll() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    // GET BY ID
+    // GET BY ID (Chống IDOR: Chỉ SysAdmin HOẶC chính chủ sở hữu tài khoản)
     @GetMapping("/{id}")
+    @PreAuthorize("@userSecurity.isCurrentUser(#id, principal)")
     public ResponseEntity<UserResponse> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    // DELETE
+    // DELETE (Chỉ SysAdmin mới có quyền xóa người dùng)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         try {
             userService.deleteUser(id);
             return ResponseEntity.ok().build();
         } catch (IllegalStateException e) {
-            // User has related data (orders, cart, etc.)
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Lỗi khi xóa người dùng: " + e.getMessage());
         }
     }

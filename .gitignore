@@ -1,9 +1,10 @@
 # Dependencies
 node_modules
 
-# IDE
+# IDE & AI Tooling
 .idea
 .vscode
+.gemini
 
 # OS
 .DS_Store
@@ -12,12 +13,12 @@ Thumbs.db
 # Logs
 *.log
 
-# Environment - ONLY USE .env.local
+# Environment
 .env
-.env.example
 .env.local
 .env.*.local
 .env.local.example
+!.env.example
 application-local.yml
 application-local.properties
 
@@ -26,6 +27,10 @@ application-local.properties
 **/application-local.properties
 **/.env.local
 **/.env.local.example
+secret/*.txt
+secrets/*.txt
+!secret/*.example
+!secrets/*.example
 
 # Build
 dist

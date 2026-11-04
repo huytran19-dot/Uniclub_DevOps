@@ -4,9 +4,9 @@ server:
 spring:
   datasource:
     # Use Docker service name 'mysql' instead of localhost
-    url: jdbc:mysql://mysql:3306/uniclub
-    username: root
-    password: huytran123
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:uniclub}
+    username: ${MYSQL_USER:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -21,24 +21,24 @@ spring:
 
 # SendGrid configuration
 sendgrid:
-  api-key: ${SENDGRID_API_KEY:your-sendgrid-api-key-here}
+  api-key: ${SENDGRID_API_KEY:}
 
 app:
   mail:
-    from: ${SENDER_EMAIL:no-reply@mail.tranhuy.dev}
+    from: ${SENDER_EMAIL:no-reply@uniclub.local}
     otp-expiration-minutes: 5
     max-attempts: 5
 
 jwt:
-  secret: uniclub-secret-key-for-jwt-token-generation-2024
-  expiration: 86400000  # 24 hours in milliseconds
+  secret: ${JWT_SECRET:}
+  expiration: ${JWT_EXPIRATION:86400000}
 
 cloudinary:
-  cloud_name: deooamndi
-  api_key: 186558834811161
-  api_secret: 7iKsQDdlEz-vPTEYyuePBiET7Sw
+  cloud_name: ${CLOUDINARY_CLOUD_NAME:}
+  api_key: ${CLOUDINARY_API_KEY:}
+  api_secret: ${CLOUDINARY_API_SECRET:}
 
 vnpay:
-  tmn-code: ${VNPAY_TMN_CODE:CGEJ0TI4}
-  hash-secret: ${VNPAY_HASH_SECRET:GNUPBN07YMSNSDZPJ1ZLBIKXVNDSOTUI}
+  tmn-code: ${VNPAY_TMN_CODE:}
+  hash-secret: ${VNPAY_HASH_SECRET:}
   return-url: ${VNPAY_RETURN_URL:http://localhost/admin/payment/vnpay-return}
