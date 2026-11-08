@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.uniclub.dto.request.Variant.CreateVariantRequest;
 import com.uniclub.dto.request.Variant.UpdateVariantRequest;
@@ -17,6 +18,7 @@ import com.uniclub.repository.ColorRepository;
 import com.uniclub.repository.ProductRepository;
 import com.uniclub.repository.SizeRepository;
 import com.uniclub.repository.VariantRepository;
+import com.uniclub.service.StorageService;
 import com.uniclub.service.VariantService;
 
 import jakarta.transaction.Transactional;
@@ -36,6 +38,9 @@ public class VariantServiceImpl implements VariantService {
 
     @Autowired
     private ColorRepository colorRepository;
+
+    @Autowired
+    private StorageService storageService;
 
     // CREATE
     @Override
@@ -87,7 +92,6 @@ public class VariantServiceImpl implements VariantService {
         return list.stream().map(VariantResponse::fromEntity).toList();
     }
 
-
     // UPDATE
     @Override
     public VariantResponse updateVariant(Integer skuId, UpdateVariantRequest request) {
@@ -111,7 +115,7 @@ public class VariantServiceImpl implements VariantService {
         if (request.getColorId() != null) {
             Color color = colorRepository.findById(request.getColorId())
                     .orElseThrow(() ->
-                            new ResourceNotFoundException("Color", "id", request.getSizeId()));
+                            new ResourceNotFoundException("Color", "id", request.getColorId()));
             v.setColor(color);
         }
 
@@ -127,10 +131,12 @@ public class VariantServiceImpl implements VariantService {
     // DELETE
     @Override
     public void deleteVariantBySku(Integer skuId) {
-        if (!variantRepository.existsById(skuId)) {
-            throw new ResourceNotFoundException("Variant", "id", skuId);
+        Variant v = variantRepository.findById(skuId)
+                .orElseThrow(() -> new ResourceNotFoundException("Variant", "id", skuId));
+        if (v.getImages() != null && !v.getImages().isBlank()) {
+            storageService.deleteImage(v.getImages());
         }
-        variantRepository.deleteById(skuId); // Hard delete; nếu muốn soft -> set status=0 rồi save
+        variantRepository.delete(v);
     }
 
     // STOCK +
@@ -176,6 +182,23 @@ public class VariantServiceImpl implements VariantService {
         variant.setImages(imageUrl);
         Variant updatedVariant = variantRepository.save(variant);
         
+        return VariantResponse.fromEntity(updatedVariant);
+    }
+
+    @Override
+    public VariantResponse uploadVariantImage(Integer sku, MultipartFile file) {
+        Variant variant = variantRepository.findById(sku)
+                .orElseThrow(() -> new ResourceNotFoundException("Variant", "sku", sku));
+
+        // Xóa ảnh cũ trên storage nếu đã tồn tại
+        String oldImageUrl = variant.getImages();
+        if (oldImageUrl != null && !oldImageUrl.isBlank()) {
+            storageService.deleteImage(oldImageUrl);
+        }
+
+        String newImageUrl = storageService.uploadImage(file, "uniclub/variants");
+        variant.setImages(newImageUrl);
+        Variant updatedVariant = variantRepository.save(variant);
         return VariantResponse.fromEntity(updatedVariant);
     }
 

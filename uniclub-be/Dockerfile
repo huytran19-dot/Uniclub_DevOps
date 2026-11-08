@@ -22,8 +22,14 @@ FROM eclipse-temurin:21-jre-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy jar from build stage
-COPY --from=build /app/target/*.jar app.jar
+# Tạo group và user non-root để tuân thủ nguyên tắc Least Privilege
+RUN addgroup -S spring && adduser -S spring -G spring
+
+# Copy jar from build stage và phân quyền cho user spring
+COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
+
+# Chuyển quyền thực thi sang user spring
+USER spring:spring
 
 # Expose port
 EXPOSE 8080
@@ -32,5 +38,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-# Run application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run application với cờ tối ưu RAM trong môi trường container
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

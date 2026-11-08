@@ -44,10 +44,12 @@ jwt:
   secret: ${JWT_SECRET:uniclub-dev-jwt-secret-key-min-256-bits-length-for-security}
   expiration: ${JWT_EXPIRATION:86400000}
 
-cloudinary:
-  cloud_name: ${CLOUDINARY_CLOUD_NAME:}
-  api_key: ${CLOUDINARY_API_KEY:}
-  api_secret: ${CLOUDINARY_API_SECRET:}
+r2:
+  account-id: ${R2_ACCOUNT_ID:}
+  access-key-id: ${R2_ACCESS_KEY_ID:}
+  secret-key: ${R2_SECRET_KEY:}
+  bucket-name: ${R2_BUCKET_NAME:uniclub-images}
+  public-url: ${R2_PUBLIC_URL:https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev}
 
 vnpay:
   tmn-code: ${VNPAY_TMN_CODE:}
