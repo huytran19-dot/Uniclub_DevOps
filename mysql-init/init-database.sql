@@ -266,6 +266,7 @@ CREATE TABLE `review` (
   `id` int NOT NULL,
   `id_product` int DEFAULT NULL,
   `id_user` int DEFAULT NULL,
+  `sku` int DEFAULT NULL,
   `star` double NOT NULL,
   `content` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `images` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,

@@ -14,6 +14,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Entity
@@ -53,6 +55,7 @@ public class BillingDetail {
     @Column(length = 255)
     private String note;
 
+    @JdbcTypeCode(SqlTypes.TINYINT)
     @Column(columnDefinition = "TINYINT DEFAULT 1")
     private Integer status = 1;
 

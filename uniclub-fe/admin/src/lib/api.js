@@ -46,7 +46,7 @@ axiosInstance.interceptors.response.use(
       // Token expired or invalid, redirect to login
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+      window.location.href = `${import.meta.env.BASE_URL.replace(/\/+$/, '')}/login`
     }
     
     console.error("❌ API Error:", error.response?.data || error.message)
