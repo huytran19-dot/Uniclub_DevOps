@@ -2,36 +2,35 @@ package com.uniclub.controller;
 
 import com.uniclub.dto.request.Variant.CreateVariantRequest;
 import com.uniclub.dto.request.Variant.UpdateVariantRequest;
+import com.uniclub.dto.response.Variant.VariantImageUploadResponse;
 import com.uniclub.dto.response.Variant.VariantResponse;
 import com.uniclub.service.VariantService;
-import com.uniclub.service.CloudinaryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/variants")
 @Validated
-@CrossOrigin(origins = "*")
 public class VariantController {
 
-    @Autowired
-    private VariantService variantService;
+    private final VariantService variantService;
 
     @Autowired
-    private CloudinaryService cloudinaryService;
+    public VariantController(VariantService variantService) {
+        this.variantService = variantService;
+    }
 
     // CREATE
     @PostMapping
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<VariantResponse> create(@Valid @RequestBody CreateVariantRequest request) {
         VariantResponse created = variantService.createVariant(request);
         return ResponseEntity
@@ -41,6 +40,7 @@ public class VariantController {
 
     // UPDATE
     @PutMapping("/{sku}")
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<VariantResponse> update(@PathVariable Integer sku,
                                                 @Valid @RequestBody UpdateVariantRequest request) {
         VariantResponse updated = variantService.updateVariant(sku, request);
@@ -61,6 +61,7 @@ public class VariantController {
 
     // INCREASE STOCK
     @PutMapping("/{sku}/stock/increase")
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<VariantResponse> increaseStock(@PathVariable Integer sku,
                                                       @RequestParam Integer amount) {
         VariantResponse updated = variantService.increaseStock(sku, amount);
@@ -69,6 +70,7 @@ public class VariantController {
 
     // DECREASE STOCK
     @PutMapping("/{sku}/stock/decrease")
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<VariantResponse> decreaseStock(@PathVariable Integer sku,
                                                       @RequestParam Integer amount) {
         VariantResponse updated = variantService.decreaseStock(sku, amount);
@@ -78,54 +80,28 @@ public class VariantController {
     // CHECK COMBINATION EXISTS
     @GetMapping("/check-combination")
     public ResponseEntity<Boolean> checkCombination(@RequestParam Integer productId,
-                                                 @RequestParam Integer sizeId,
-                                                 @RequestParam Integer colorId) {
+                                                  @RequestParam Integer sizeId,
+                                                  @RequestParam Integer colorId) {
         boolean exists = variantService.existsByCombination(productId, sizeId, colorId);
         return ResponseEntity.ok(exists);
     }
 
     // UPLOAD IMAGE FOR VARIANT
     @PostMapping("/{sku}/upload-image")
-    public ResponseEntity<?> uploadVariantImage(@PathVariable Integer sku, 
-                                               @RequestParam("file") MultipartFile file) {
-        try {
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body("File is empty");
-            }
-
-            // Validate file type
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                return ResponseEntity.badRequest().body("File must be an image");
-            }
-
-            // Validate file size (max 5MB)
-            if (file.getSize() > 5 * 1024 * 1024) {
-                return ResponseEntity.badRequest().body("File size must be less than 5MB");
-            }
-
-            // Upload image to Cloudinary
-            String imageUrl = cloudinaryService.uploadImage(file, "uniclub/variants");
-            
-            // Update variant with new image URL
-            VariantResponse updated = variantService.updateVariantImage(sku, imageUrl);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("variant", updated);
-            response.put("imageUrl", imageUrl);
-            response.put("message", "Image uploaded and variant updated successfully");
-
-            return ResponseEntity.ok(response);
-
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().body("Failed to upload image: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Unexpected error: " + e.getMessage());
-        }
+    @PreAuthorize("hasRole('SysAdmin')")
+    public ResponseEntity<VariantImageUploadResponse> uploadVariantImage(@PathVariable Integer sku, 
+                                                                         @RequestParam("file") MultipartFile file) {
+        VariantResponse updated = variantService.uploadVariantImage(sku, file);
+        return ResponseEntity.ok(VariantImageUploadResponse.of(
+                updated, 
+                updated.getImages(), 
+                "Image uploaded and variant updated successfully"
+        ));
     }
 
     // DELETE
     @DeleteMapping("/{sku}")
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<Void> delete(@PathVariable Integer sku) {
         variantService.deleteVariantBySku(sku);
         return ResponseEntity.noContent().build();

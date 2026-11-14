@@ -2,7 +2,7 @@ name: CD - Build and push Docker images
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: [ 'main', 'develop' ]
 
 permissions:
   contents: read
@@ -36,7 +36,7 @@ jobs:
           file: ./uniclub-be/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/uniclub-backend:latest
+            ghcr.io/${{ github.repository_owner }}/uniclub-backend:${{ github.ref_name == 'main' && 'latest' || 'develop' }}
             ghcr.io/${{ github.repository_owner }}/uniclub-backend:${{ github.sha }}
           platforms: linux/amd64
 
@@ -47,6 +47,6 @@ jobs:
           file: ./uniclub-fe/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/uniclub-frontend:latest
+            ghcr.io/${{ github.repository_owner }}/uniclub-frontend:${{ github.ref_name == 'main' && 'latest' || 'develop' }}
             ghcr.io/${{ github.repository_owner }}/uniclub-frontend:${{ github.sha }}
           platforms: linux/amd64

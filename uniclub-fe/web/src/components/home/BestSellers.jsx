@@ -63,7 +63,7 @@ export default function BestSellers() {
           const brand = brands.find((b) => b.id === product.brandId)
           const firstVariant = productVariants[0]
           
-          // Images is now a direct URL string from Cloudinary
+          // Images is a direct public CDN URL (Cloudflare R2)
           let imageUrl = "/placeholder.svg?height=400&width=400"
           if (firstVariant?.images) {
             imageUrl = firstVariant.images

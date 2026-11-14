@@ -266,6 +266,7 @@ CREATE TABLE `review` (
   `id` int NOT NULL,
   `id_product` int DEFAULT NULL,
   `id_user` int DEFAULT NULL,
+  `sku` int DEFAULT NULL,
   `star` double NOT NULL,
   `content` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `images` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -407,15 +408,15 @@ CREATE TABLE `variant` (
 --
 
 INSERT INTO `variant` (`sku`, `id_product`, `id_size`, `id_color`, `images`, `quantity`, `price`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 5, 5, 'https://res.cloudinary.com/deooamndi/image/upload/v1761234752/uniclub/variants/jkc53v3xoluixh6lfnr2.jpg', 0, 108000, 1, '2025-10-23 22:52:26', '2025-10-24 10:45:08'),
-(2, 1, 4, 1, 'https://res.cloudinary.com/deooamndi/image/upload/v1761309582/uniclub/variants/rbgfmd6b0bkffvjglp2w.jpg', 0, 108000, 1, '2025-10-24 19:39:06', '2025-10-24 19:39:06'),
-(3, 1, 5, 6, 'https://res.cloudinary.com/deooamndi/image/upload/v1761309762/uniclub/variants/bzzbmcscdmioh1plz8se.jpg', 0, 108000, 1, '2025-10-24 19:42:33', '2025-10-24 19:42:33'),
-(4, 2, 5, 6, 'https://res.cloudinary.com/deooamndi/image/upload/v1761309990/uniclub/variants/pqfdnkwfwqvwvqglgxpr.jpg', 0, 135000, 1, '2025-10-24 19:45:10', '2025-10-24 19:45:41'),
-(5, 2, 4, 10, 'https://res.cloudinary.com/deooamndi/image/upload/v1761310032/uniclub/variants/hsszyoner92irei0z60r.jpg', 0, 127000, 1, '2025-10-24 19:46:24', '2025-10-24 19:46:24'),
-(6, 2, 5, 11, 'https://res.cloudinary.com/deooamndi/image/upload/v1761310890/uniclub/variants/ijegkhf1kfzzzwhw2cfg.jpg', 0, 140000, 1, '2025-10-24 20:00:40', '2025-10-24 20:00:40'),
-(7, 3, 5, 6, 'https://res.cloudinary.com/deooamndi/image/upload/v1761310975/uniclub/variants/kevpfl2cpg8as0qzjoc4.jpg', 0, 150000, 1, '2025-10-24 20:02:09', '2025-10-24 20:02:09'),
-(8, 3, 5, 5, 'https://res.cloudinary.com/deooamndi/image/upload/v1761311014/uniclub/variants/shxd4gpykyx9b2gsmhth.jpg', 0, 140000, 1, '2025-10-24 20:02:46', '2025-10-24 20:02:46'),
-(9, 3, 4, 2, 'https://res.cloudinary.com/deooamndi/image/upload/v1761311050/uniclub/variants/ki43fdaaxkae7nvj8cce.jpg', 0, 160000, 1, '2025-10-24 20:03:21', '2025-10-24 20:03:21');
+(1, 1, 5, 5, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/jkc53v3xoluixh6lfnr2.jpg', 0, 108000, 1, '2025-10-23 22:52:26', '2025-10-24 10:45:08'),
+(2, 1, 4, 1, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/rbgfmd6b0bkffvjglp2w.jpg', 0, 108000, 1, '2025-10-24 19:39:06', '2025-10-24 19:39:06'),
+(3, 1, 5, 6, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/bzzbmcscdmioh1plz8se.jpg', 0, 108000, 1, '2025-10-24 19:42:33', '2025-10-24 19:42:33'),
+(4, 2, 5, 6, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/pqfdnkwfwqvwvqglgxpr.jpg', 0, 135000, 1, '2025-10-24 19:45:10', '2025-10-24 19:45:41'),
+(5, 2, 4, 10, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/hsszyoner92irei0z60r.jpg', 0, 127000, 1, '2025-10-24 19:46:24', '2025-10-24 19:46:24'),
+(6, 2, 5, 11, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/ijegkhf1kfzzzwhw2cfg.jpg', 0, 140000, 1, '2025-10-24 20:00:40', '2025-10-24 20:00:40'),
+(7, 3, 5, 6, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/kevpfl2cpg8as0qzjoc4.jpg', 0, 150000, 1, '2025-10-24 20:02:09', '2025-10-24 20:02:09'),
+(8, 3, 5, 5, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/shxd4gpykyx9b2gsmhth.jpg', 0, 140000, 1, '2025-10-24 20:02:46', '2025-10-24 20:02:46'),
+(9, 3, 4, 2, 'https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/ki43fdaaxkae7nvj8cce.jpg', 0, 160000, 1, '2025-10-24 20:03:21', '2025-10-24 20:03:21');
 
 
 --

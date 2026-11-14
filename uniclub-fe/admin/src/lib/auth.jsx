@@ -77,7 +77,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('user')
     setUser(null)
     // Force redirect to login page
-    window.location.href = '/login'
+    window.location.href = `${import.meta.env.BASE_URL.replace(/\/+$/, '')}/login`
   }
 
   const isAuthenticated = () => {

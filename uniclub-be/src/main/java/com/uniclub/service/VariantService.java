@@ -3,6 +3,7 @@ package com.uniclub.service;
 import com.uniclub.dto.request.Variant.CreateVariantRequest;
 import com.uniclub.dto.request.Variant.UpdateVariantRequest;
 import com.uniclub.dto.response.Variant.VariantResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface VariantService {
     boolean existsByCombination(Integer productId, Integer sizeId, Integer colorId);
     
     VariantResponse updateVariantImage(Integer sku, String imageUrl);
+
+    VariantResponse uploadVariantImage(Integer sku, MultipartFile file);
 }

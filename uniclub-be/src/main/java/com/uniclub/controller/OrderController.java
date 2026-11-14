@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,7 +32,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    // CREATE
+    // CREATE (Khách hàng đã đăng nhập tạo đơn hàng)
     @PostMapping
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody CreateOrderRequest request) {
         OrderResponse created = orderService.createOrder(request);
@@ -42,32 +43,37 @@ public class OrderController {
 
     // UPDATE
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SysAdmin') or @orderSecurity.isOwner(#id, principal)")
     public ResponseEntity<OrderResponse> update(@PathVariable Integer id,
                                                 @Valid @RequestBody CreateOrderRequest request) {
         OrderResponse updated = orderService.updateOrder(id, request);
         return ResponseEntity.ok(updated);
     }
 
-    // GET ALL
+    // GET ALL (Chỉ SysAdmin mới được xem toàn bộ đơn hàng trong hệ thống)
     @GetMapping
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<List<OrderResponse>> getAll() {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
     
-    // GET BY USER ID
+    // GET BY USER ID (Chống IDOR: Chỉ SysAdmin hoặc chính User đó mới được xem đơn hàng của mình)
     @GetMapping("/user/{userId}")
+    @PreAuthorize("@orderSecurity.isUserOwner(#userId, principal)")
     public ResponseEntity<List<OrderResponse>> getByUserId(@PathVariable Integer userId) {
         return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
     }
 
-    // GET BY ID
+    // GET BY ID (Chống IDOR: Chỉ SysAdmin hoặc chính chủ sở hữu đơn hàng)
     @GetMapping("/{id}")
+    @PreAuthorize("@orderSecurity.isOwner(#id, principal)")
     public ResponseEntity<OrderResponse> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
-    // UPDATE ORDER STATUS
+    // UPDATE ORDER STATUS (Chỉ SysAdmin mới được duyệt/đổi trạng thái đơn hàng)
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<OrderResponse> updateStatus(@PathVariable Integer id,
                                                     @RequestBody CreateOrderRequest request) {
         try {
@@ -80,8 +86,9 @@ public class OrderController {
         }
     }
 
-    // CANCEL ORDER (Customer)
+    // CANCEL ORDER (Chống IDOR: Chỉ chủ sở hữu đơn hàng hoặc SysAdmin mới được hủy)
     @PutMapping("/{id}/cancel")
+    @PreAuthorize("@orderSecurity.isOwner(#id, principal)")
     public ResponseEntity<?> cancelOrder(@PathVariable Integer id) {
         try {
             OrderResponse cancelled = orderService.cancelOrder(id);
@@ -93,8 +100,9 @@ public class OrderController {
         }
     }
 
-    // RETRY PAYMENT - Get new VNPay URL for failed VNPay payment
+    // RETRY PAYMENT (Chống IDOR: Chỉ chủ sở hữu đơn hàng hoặc SysAdmin)
     @PostMapping("/{id}/retry-payment")
+    @PreAuthorize("@orderSecurity.isOwner(#id, principal)")
     public ResponseEntity<?> retryPayment(@PathVariable Integer id) {
         try {
             String paymentUrl = orderService.retryVNPayPayment(id);
@@ -106,8 +114,9 @@ public class OrderController {
         }
     }
 
-    // DELETE
+    // DELETE (Chỉ SysAdmin mới có quyền xóa đơn hàng)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();

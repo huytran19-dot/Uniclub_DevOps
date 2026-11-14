@@ -12,6 +12,8 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @NoArgsConstructor
@@ -26,6 +28,7 @@ public class Size {
     private String name;
 
     // 1 = active, 0 = inactive
+    @JdbcTypeCode(SqlTypes.TINYINT)
     @Column(nullable = false, columnDefinition = "TINYINT DEFAULT 1")
     private Integer status = 1;
 

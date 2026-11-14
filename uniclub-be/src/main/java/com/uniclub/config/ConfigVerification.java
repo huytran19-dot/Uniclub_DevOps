@@ -18,16 +18,19 @@ public class ConfigVerification {
     @Value("${spring.datasource.url:jdbc:mysql://localhost:3307/uniclub}")
     private String dbUrl;
     
-    @Value("${sendgrid.api-key:your-sendgrid-api-key-here}")
+    @Value("${sendgrid.api-key:}")
     private String sendgridKey;
     
-    @Value("${cloudinary.cloud_name:deooamndi}")
-    private String cloudinaryName;
+    @Value("${r2.bucket-name:uniclub-images}")
+    private String r2BucketName;
+
+    @Value("${r2.public-url:}")
+    private String r2PublicUrl;
     
-    @Value("${jwt.secret:uniclub-secret-key-for-jwt-token-generation-2024}")
+    @Value("${jwt.secret:uniclub-dev-jwt-secret-key-min-256-bits-length-for-security}")
     private String jwtSecret;
     
-    @Value("${vnpay.tmn-code:CGEJ0TI4}")
+    @Value("${vnpay.tmn-code:}")
     private String vnpayTmn;
     
     @PostConstruct
@@ -37,7 +40,8 @@ public class ConfigVerification {
         log.info("========================================");
         log.info("✅ Database URL: {}", obfuscate(dbUrl));
         log.info("✅ SendGrid API Key: {}", obfuscate(sendgridKey));
-        log.info("✅ Cloudinary Cloud: {}", obfuscate(cloudinaryName));
+        log.info("✅ Cloudflare R2 Bucket: {}", r2BucketName);
+        log.info("✅ Cloudflare R2 Public URL: {}", obfuscate(r2PublicUrl));
         log.info("✅ JWT Secret: {}", obfuscate(jwtSecret));
         log.info("✅ VNPay TMN Code: {}", obfuscate(vnpayTmn));
         log.info("========================================");

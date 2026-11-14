@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { api } from '../lib/api'
 
 export default function FileUpload({ 
   label, 
@@ -6,7 +7,7 @@ export default function FileUpload({
   onChange, 
   error, 
   accept = "image/*",
-  maxSize = 5 * 1024 * 1024, // 5MB
+  maxSize = 7 * 1024 * 1024, // 7MB
   className = "",
   singleImage = true // Chỉ cho phép 1 ảnh
 }) {
@@ -47,23 +48,8 @@ export default function FileUpload({
     setUploading(true)
     
     try {
-      // Create FormData
-      const formData = new FormData()
-      formData.append('file', file)
-
-      // Upload to backend
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
-      const response = await fetch(`${API_URL}/upload/image/variant`, {
-        method: 'POST',
-        body: formData
-      })
-
-      if (!response.ok) {
-        const errorData = await response.text()
-        throw new Error(errorData || 'Upload failed')
-      }
-
-      const result = await response.json()
+      // Upload via centralized Axios instance (auto-attaches JWT token)
+      const result = await api.uploadImage(file)
       const imageUrl = result.url
 
       // Update preview and form value
@@ -72,7 +58,11 @@ export default function FileUpload({
 
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Lỗi upload: ' + error.message)
+      const message = error.response?.data?.message
+        || error.response?.data
+        || error.message
+        || 'Upload thất bại'
+      alert('Lỗi upload: ' + message)
     } finally {
       setUploading(false)
     }

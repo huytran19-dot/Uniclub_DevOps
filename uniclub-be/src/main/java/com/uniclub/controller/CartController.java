@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,7 +33,7 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    // CREATE
+    // CREATE (Tạo giỏ hàng)
     @PostMapping
     public ResponseEntity<CartResponse> create(@Valid @RequestBody CreateCartRequest request) {
         CartResponse created = cartService.createCart(request);
@@ -41,41 +42,47 @@ public class CartController {
                 .body(created);
     }
 
-    // UPDATE
+    // UPDATE (Chống IDOR: Chỉ chủ sở hữu giỏ hàng hoặc SysAdmin)
     @PutMapping("/{id}")
+    @PreAuthorize("@cartSecurity.isCartOwner(#id, principal)")
     public ResponseEntity<CartResponse> update(@PathVariable Integer id,
                                                 @Valid @RequestBody UpdateCartRequest request) {
         CartResponse updated = cartService.updateCart(id, request);
         return ResponseEntity.ok(updated);
     }
 
-    // GET ALL
+    // GET ALL (Chỉ SysAdmin mới được xem tất cả giỏ hàng)
     @GetMapping
+    @PreAuthorize("hasRole('SysAdmin')")
     public ResponseEntity<List<CartResponse>> getAll() {
         return ResponseEntity.ok(cartService.getAllCarts());
     }
 
-    // GET BY ID
+    // GET BY ID (Chống IDOR: Chỉ chủ sở hữu giỏ hàng hoặc SysAdmin)
     @GetMapping("/{id}")
+    @PreAuthorize("@cartSecurity.isCartOwner(#id, principal)")
     public ResponseEntity<CartResponse> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(cartService.getCartById(id));
     }
 
-    // GET BY USER ID
+    // GET BY USER ID (Chống IDOR: Chỉ SysAdmin hoặc chính User đó)
     @GetMapping("/user/{userId}")
+    @PreAuthorize("@cartSecurity.isCartUserOwner(#userId, principal)")
     public ResponseEntity<CartResponse> getByUserId(@PathVariable Integer userId) {
         return ResponseEntity.ok(cartService.getCartByUserId(userId));
     }
 
-    // DELETE
+    // DELETE (Chống IDOR: Chỉ chủ sở hữu giỏ hàng hoặc SysAdmin)
     @DeleteMapping("/{id}")
+    @PreAuthorize("@cartSecurity.isCartOwner(#id, principal)")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         cartService.deleteCart(id);
         return ResponseEntity.noContent().build();
     }
     
-    // CLEAR CART BY USER ID
+    // CLEAR CART BY USER ID (Chống IDOR: Chỉ SysAdmin hoặc chính User đó)
     @DeleteMapping("/user/{userId}/clear")
+    @PreAuthorize("@cartSecurity.isCartUserOwner(#userId, principal)")
     public ResponseEntity<Void> clearByUserId(@PathVariable Integer userId) {
         cartService.clearCartByUserId(userId);
         return ResponseEntity.noContent().build();

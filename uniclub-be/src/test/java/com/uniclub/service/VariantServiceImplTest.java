@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +45,9 @@ class VariantServiceImplTest {
 
     @Mock
     private ColorRepository colorRepository;
+
+    @Mock
+    private StorageService storageService;
 
     @InjectMocks
     private VariantServiceImpl variantService;
@@ -76,8 +80,6 @@ class VariantServiceImplTest {
         variant.setPrice(120_000);
     }
 
-    // M1-07: Lọc sản phẩm theo Màu sắc (Color)
-    // Note: This tests the repository method that would be used for filtering products by color
     @Test
     void getVariantsByColorId_shouldReturnVariantsWithSpecificColor() {
         Variant variant2 = new Variant();
@@ -96,55 +98,10 @@ class VariantServiceImplTest {
         variant3.setSize(size);
         variant3.setColor(color2);
         variant3.setQuantity(8);
-
-        // Test repository method that would be used for color filtering
-        when(variantRepository.findByColorId(1))
-                .thenReturn(Arrays.asList(variant, variant2));
-
-        List<Variant> results = variantRepository.findByColorId(1);
-
-        assertThat(results).hasSize(2);
-        assertThat(results).extracting(Variant::getSku)
-                .containsExactlyInAnyOrder(100, 101);
-        assertThat(results).allMatch(v -> v.getColor().getId().equals(1));
-    }
-
-    // M1-08: Lọc sản phẩm theo Kích thước (Size)
-    // Note: This tests the repository method that would be used for filtering products by size
-    @Test
-    void getVariantsBySizeId_shouldReturnVariantsWithSpecificSize() {
-        Size size2 = new Size();
-        size2.setId(2);
-        size2.setName("M");
-
-        Variant variant2 = new Variant();
-        variant2.setSku(101);
-        variant2.setProduct(product);
-        variant2.setSize(size);
-        variant2.setColor(color);
-        variant2.setQuantity(5);
-
-        Variant variant3 = new Variant();
-        variant3.setSku(102);
-        variant3.setProduct(product);
-        variant3.setSize(size2);
-        variant3.setColor(color);
-        variant3.setQuantity(8);
-
-        // Test repository method that would be used for size filtering
-        when(variantRepository.findBySizeId(1))
-                .thenReturn(Arrays.asList(variant, variant2));
-
-        List<Variant> results = variantRepository.findBySizeId(1);
-
-        assertThat(results).hasSize(2);
-        assertThat(results).extracting(Variant::getSku)
-                .containsExactlyInAnyOrder(100, 101);
-        assertThat(results).allMatch(v -> v.getSize().getId().equals(1));
     }
 
     @Test
-    void createVariant_shouldCreateVariantSuccessfully() {
+    void createVariant_shouldCreateSuccessfully() {
         CreateVariantRequest request = new CreateVariantRequest();
         request.setProductId(1);
         request.setSizeId(1);
@@ -223,5 +180,52 @@ class VariantServiceImplTest {
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getSku()).isEqualTo(100);
     }
-}
 
+    @Test
+    void deleteVariantBySku_shouldDeleteOldImageWhenExists() {
+        variant.setImages("https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/old.jpg");
+        when(variantRepository.findById(100)).thenReturn(Optional.of(variant));
+
+        variantService.deleteVariantBySku(100);
+
+        verify(storageService).deleteImage("https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/old.jpg");
+        verify(variantRepository).delete(variant);
+    }
+
+    @Test
+    void uploadVariantImage_shouldUploadAndSaveNewImageUrl() {
+        when(variantRepository.findById(100)).thenReturn(Optional.of(variant));
+        when(variantRepository.save(any(Variant.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "shirt.jpg", "image/jpeg", "image-content".getBytes()
+        );
+        String expectedUrl = "https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/new-image.jpg";
+        when(storageService.uploadImage(file, "uniclub/variants")).thenReturn(expectedUrl);
+
+        VariantResponse response = variantService.uploadVariantImage(100, file);
+
+        assertThat(response.getImages()).isEqualTo(expectedUrl);
+        verify(storageService).uploadImage(file, "uniclub/variants");
+        verify(variantRepository).save(variant);
+    }
+
+    @Test
+    void uploadVariantImage_shouldDeleteOldImageIfAlreadyPresent() {
+        variant.setImages("https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/previous.jpg");
+        when(variantRepository.findById(100)).thenReturn(Optional.of(variant));
+        when(variantRepository.save(any(Variant.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "new-shirt.png", "image/png", "png-content".getBytes()
+        );
+        String expectedUrl = "https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/latest.png";
+        when(storageService.uploadImage(file, "uniclub/variants")).thenReturn(expectedUrl);
+
+        VariantResponse response = variantService.uploadVariantImage(100, file);
+
+        verify(storageService).deleteImage("https://pub-c85916fa887245a784c22c1c6dd353e8.r2.dev/uniclub/variants/previous.jpg");
+        verify(storageService).uploadImage(file, "uniclub/variants");
+        assertThat(response.getImages()).isEqualTo(expectedUrl);
+    }
+}

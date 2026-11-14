@@ -71,8 +71,8 @@ public class AuthService {
             throw new RuntimeException("Email hoặc mật khẩu không đúng");
         }
 
-        // Generate JWT token
-        String token = jwtConfig.generateToken(user.getEmail(), user.getRole().getName());
+        // Generate JWT token with email, userId and role
+        String token = jwtConfig.generateToken(user.getEmail(), user.getId(), user.getRole().getName());
 
         // Return login response
         return new LoginResponse(
