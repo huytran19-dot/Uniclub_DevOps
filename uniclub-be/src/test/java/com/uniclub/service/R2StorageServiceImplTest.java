@@ -71,6 +71,15 @@ class R2StorageServiceImplTest {
     }
 
     @Test
+    void uploadImage_shouldThrowWhenFileSizeExceedsLimit() {
+        byte[] largeBytes = new byte[7 * 1024 * 1024 + 1];
+        MockMultipartFile largeFile = new MockMultipartFile("file", "large.jpg", "image/jpeg", largeBytes);
+        assertThatThrownBy(() -> storageService.uploadImage(largeFile))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Dung lượng file vượt quá giới hạn tối đa cho phép (7MB)");
+    }
+
+    @Test
     void uploadImage_shouldOptimizeAndUploadValidJpeg() throws IOException {
         BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = image.createGraphics();

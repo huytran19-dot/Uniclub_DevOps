@@ -17,6 +17,11 @@ spring:
   task:
     scheduling:
       enabled: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 7MB
+      max-request-size: 7MB
 
 # Actuator configuration for health checks
 management:

@@ -66,6 +66,9 @@ async function fetchAPI(endpoint, options = {}) {
   }
 }
 
+// Export axiosInstance for components needing direct access (e.g. file upload)
+export { axiosInstance }
+
 export const api = {
   // Generic CRUD
   list: async (resource, params = {}) => {
@@ -124,6 +127,16 @@ export const api = {
       method: 'GET'
     })
     return data || []
+  },
+
+  // File upload (multipart/form-data — do NOT set Content-Type manually)
+  uploadImage: async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await axiosInstance.post('/upload/image/variant', formData, {
+      headers: { 'Content-Type': undefined }
+    })
+    return response.data
   },
 
   // Order specific API

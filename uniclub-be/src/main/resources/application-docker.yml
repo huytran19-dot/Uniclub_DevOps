@@ -20,6 +20,11 @@ spring:
   task:
     scheduling:
       enabled: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 7MB
+      max-request-size: 7MB
 
 # Actuator configuration for container health checks
 management:
@@ -33,7 +38,7 @@ management:
 
 # SendGrid configuration
 sendgrid:
-  api-key: ${SENDGRID_API_KEY:}
+  api-key: ${sendgrid_api_key:${SENDGRID_API_KEY:}}
 
 app:
   mail:

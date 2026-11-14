@@ -25,7 +25,7 @@ public class R2StorageServiceImpl implements StorageService {
     private static final String DEFAULT_FOLDER = "uniclub/variants";
     private static final int MAX_IMAGE_DIMENSION = 1200;
     private static final float COMPRESSION_QUALITY = 0.82f;
-    private static final long MAX_FILE_SIZE = 10L * 1024 * 1024; // 10MB
+    private static final long MAX_FILE_SIZE = 7L * 1024 * 1024; // 7MB
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp", "gif");
 
     private final S3Client s3Client;
@@ -120,7 +120,7 @@ public class R2StorageServiceImpl implements StorageService {
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("Dung lượng file vượt quá giới hạn tối đa cho phép (10MB)");
+            throw new IllegalArgumentException("Dung lượng file vượt quá giới hạn tối đa cho phép (7MB)");
         }
 
         String extension = getFileExtension(file.getOriginalFilename());
