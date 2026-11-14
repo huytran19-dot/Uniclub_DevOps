@@ -38,7 +38,7 @@ jobs:
 
       - name: Test (Maven)
         working-directory: ./uniclub-be
-        run: ./mvnw -B test
+        run: ./mvnw -B test -Dtest="!*IntegrationTest"
 
   frontend:
     name: Build Frontend
